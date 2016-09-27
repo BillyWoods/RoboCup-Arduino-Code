@@ -1,0 +1,35 @@
+/* 
+   Digital/interrupt-based IR code for reading pulse widths outputted
+   by IR demodulators. This code is suffixed ".unused" because
+   we opted to use a low pass filter on the IR output pin, which 
+   effectively averages the duty cycle and lets us use analogRead
+   on them. 
+   
+   This digital method seemed to be the only way to get
+   meaningful intensity readings off the TSOP34840 sensors
+   (which we were trialling), but our original sensors (which
+   we stuck with because the TSOP34840's AGC was wreaking havoc)
+   worked perfectly fine with the analog method.
+*/
+
+
+#ifndef IR_SENSOR_H
+#define IR_SENSOR_H
+
+#include <Arduino.h>
+
+// uncomment for the IR handling interrupt to set a pin high on entry
+//   and low on exit, for measuring interrupt length
+//#define ISR_SCOPE_OUTPUT
+
+// max is 8
+#define NUM_IRS 2
+#define FIRST_IR_OFFSET_IN_REG 0 
+
+void initIRs();
+void getIRReadings(int* IRArray);
+
+// unimplemented as of yet
+int getBallAngle();
+
+#endif

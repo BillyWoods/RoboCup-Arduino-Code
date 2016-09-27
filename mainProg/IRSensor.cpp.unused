@@ -1,0 +1,83 @@
+#include "IRSensor.h"
+
+// no barrel shifter, so dont want to do this over and over
+const uint8_t preShiftedIRBitsBegin = 1 << FIRST_IR_OFFSET_IN_REG; 
+const uint8_t IRMask = 1<<PCINT16 | 1<<PCINT17;
+
+volatile uint16_t IRLastFalling[NUM_IRS];
+volatile int IRLastMeasuredDuration[NUM_IRS];
+// IR sensors will start off high with no signal
+volatile uint8_t lastPinStates = IRMask; 
+volatile uint8_t newReadings = 0;
+
+void initIRs()
+{
+    pinMode(A9, INPUT);
+    pinMode(A8, INPUT);
+
+#ifdef ISR_SCOPE_OUTPUT
+    pinMode(A0, OUTPUT); // aka PC0
+#endif
+
+    cli();
+    // enable pin change interrupts on PB3 and PB4 (pin 11 and 12 in Arduino mapping)
+    PCICR |= 1<<PCIE2;
+    PCMSK2 |= IRMask;
+    sei();
+}
+
+void getIRReadings(int* IRArray)
+{
+    uint8_t selector = preShiftedIRBitsBegin;
+    cli();
+    for (int i=0; i<NUM_IRS; i++)
+    {
+        IRArray[i] =  newReadings & (selector) ? IRLastMeasuredDuration[i] : 0; 
+        selector <<= 1;
+    }       
+
+    newReadings = 0;
+    sei();
+}
+
+
+#ifdef ISR_SCOPE_OUTPUT
+    const uint8_t PC0Selector = 1<<PC0;
+#endif
+
+// runs in 5-10us
+ISR(PCINT2_vect)
+{
+#ifdef ISR_SCOPE_OUTPUT
+    PORTC |= PC0Selector;
+#endif
+    
+    uint16_t timeNow = micros();
+    uint8_t curPinStates = PINK;
+    
+    uint8_t risenPins = ~(lastPinStates) & curPinStates;
+    uint8_t fallenPins = lastPinStates & ~(curPinStates);
+
+    uint8_t bitSelector = preShiftedIRBitsBegin;
+    
+    for (int i=0; i<NUM_IRS; i++)
+    {
+        // signal out of IRs inverted, so begin timing on a falling edge
+        if(fallenPins & bitSelector)
+            IRLastFalling[i] = timeNow;
+        else if (risenPins & bitSelector)
+        {
+            IRLastMeasuredDuration[i] *= 3;
+            IRLastMeasuredDuration[i] += timeNow - IRLastFalling[i];
+            IRLastMeasuredDuration[i] >>= 2; // perform an average/smoothing
+            newReadings |= bitSelector;
+        }
+        // move on to looking at next IR bit
+        bitSelector = bitSelector << 1;
+    }
+    lastPinStates = curPinStates;
+    
+#ifdef ISR_SCOPE_OUTPUT
+    PORTC &= ~(PC0Selector);
+#endif
+}
