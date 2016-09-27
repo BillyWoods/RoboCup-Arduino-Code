@@ -1,0 +1,19 @@
+Stepper related changes:
+
+    Investigate use of acceleration tables for proper linear acceleration
+
+
+Main prog changes:
+    
+    implement DRIBBLE_BALL
+    
+    perhaps investigate implementing distance into getBallAngle
+    
+    
+In OpenSCAD model:
+
+    no holes on plates for ultrasonics, 
+
+    new IR mount for the front of bot which can have 4-5 differently angled sensors, all in one, while at it, create an IR negative object, undo the shonky stuff
+    
+    

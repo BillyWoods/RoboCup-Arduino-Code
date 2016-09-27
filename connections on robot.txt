@@ -1,0 +1,39 @@
+WIRING OF SOCCER ROBOT
+
+ <arduino pin number> - function
+ 
+ A0 - Left IR sensor
+ A1 - Right IR sensor
+ A2 - Ball roller current sense
+ A3 - Centre IR sensor
+ 
+(deprecated) 2 - Back driver In1
+(deprecated) 3 - Back driver In2
+(deprecated) 4 - Left wheel In4
+(deprecated) 5 - Left wheel In3
+(deprecated) 6 - Right wheel In1
+(deprecated) 7 - Right wheel In2
+
+ 6 - Ball roller In2  (NOTE: 6 high, 7 low to roll ball correct way)
+ 7 - Ball roller In1
+ 
+ 13 - control switch
+  
+ 20 - Compass SDA
+ 21 - Compass SCL
+ 
+ 30 - Front trig
+ 31 - Front echo
+ 32 - Right trig
+ 33 - Right echo
+ 34 - Back trig
+ 35 - Back echo
+ 36 - Left trig
+ 37 - Left echo
+
+ 43 - l step
+ 45 - l dir
+ 47 - r step
+ 49 - r dir
+ 51 - b step
+ 53 - b dir
